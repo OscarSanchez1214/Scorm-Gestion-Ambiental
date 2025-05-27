@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="authoring-tool" content="Adobe_Animate_CC">
-  <title>GESTIÓN AMBIENTAL</title>
+  <title>index</title>
+
   <style>
     html, body {
       margin: 0;
@@ -15,12 +16,15 @@
     }
 
     #animation_container {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
-      position: relative;
     }
 
     canvas {
+      position: absolute;
       background-color: rgba(255, 255, 255, 1.00);
       display: none;
     }
@@ -38,6 +42,7 @@
       position: absolute;
       top: 0;
       left: 0;
+      display: inline-block;
       width: 100%;
       height: 100%;
       text-align: center;
@@ -47,20 +52,6 @@
       vertical-align: middle;
       max-height: 100%;
     }
-
-    #scorm_title {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-family: Arial, sans-serif;
-      font-size: 20px;
-      font-weight: bold;
-      color: #444;
-      background: rgba(255,255,255,0.8);
-      padding: 5px 10px;
-      border-radius: 4px;
-      z-index: 9999;
-    }
   </style>
 
   <script src="libs/1.0.0/createjs.min.js"></script>
@@ -69,6 +60,7 @@
 
   <script>
     var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
+
     function init() {
       canvas = document.getElementById("canvas");
       anim_container = document.getElementById("animation_container");
@@ -78,14 +70,18 @@
       var lib = comp.getLibrary();
 
       var loader = new createjs.LoadQueue(false);
-      loader.addEventListener("fileload", function(evt){ handleFileLoad(evt, comp); });
-      loader.addEventListener("complete", function(evt){ handleComplete(evt, comp); });
+      loader.addEventListener("fileload", function(evt) {
+        handleFileLoad(evt, comp);
+      });
+      loader.addEventListener("complete", function(evt) {
+        handleComplete(evt, comp);
+      });
       loader.loadManifest(lib.properties.manifest);
     }
 
     function handleFileLoad(evt, comp) {
       var images = comp.getImages();
-      if (evt && (evt.item.type === "image")) {
+      if (evt && evt.item.type === "image") {
         images[evt.item.id] = evt.result;
       }
     }
@@ -96,4 +92,43 @@
       var queue = evt.target;
       var ssMetadata = lib.ssMetadata;
 
-      for (var i = 0; i <
+      for (var i = 0; i < ssMetadata.length; i++) {
+        ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+          "images": [queue.getResult(ssMetadata[i].name)],
+          "frames": ssMetadata[i].frames
+        });
+      }
+
+      document.getElementById("_preload_div_").style.display = 'none';
+      dom_overlay_container.style.display = canvas.style.display = 'block';
+
+      exportRoot = new lib.index();
+      stage = new lib.Stage(canvas);
+      stage.enableMouseOver();
+
+      fnStartAnimation = function() {
+        stage.addChild(exportRoot);
+        createjs.Ticker.framerate = lib.properties.fps;
+        createjs.Ticker.addEventListener("tick", stage);
+      }
+
+      // Escalado proporcional responsivo (preserva proporción 1280x720)
+      AdobeAn.makeResponsive(true, 'both', false, 1, [canvas, anim_container, dom_overlay_container]);
+
+      AdobeAn.compositionLoaded(lib.properties.id);
+      fnStartAnimation();
+    }
+  </script>
+</head>
+
+<body onload="init();">
+  <div id="animation_container">
+    <canvas id="canvas" width="1280" height="720"></canvas>
+    <div id="dom_overlay_container"></div>
+  </div>
+  <div id="_preload_div_">
+    <span style="display: inline-block; height: 100%; vertical-align: middle;"></span>
+    <img src="images/_preloader.gif" />
+  </div>
+</body>
+</html>
