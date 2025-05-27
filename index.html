@@ -37,15 +37,22 @@
       top: 0;
       display: none;
     }
+
+    #_preload_div_ {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+    }
+
+    #_preload_div_ img {
+      vertical-align: middle;
+      max-height: 100%;
+    }
   </style>
-
-  <style>
-  /* Oculta completamente el video */
-  #mcVideo {
-    display: none !important;
-  }
-</style>
-
 
   <script src="libs/1.0.0/createjs.min.js"></script>
   <script src="index.js"></script>
@@ -92,7 +99,7 @@
         });
       }
 
-      // Se eliminó la línea que ocultaba el preloader
+      document.getElementById("_preload_div_").style.display = 'none';
       dom_overlay_container.style.display = canvas.style.display = 'block';
 
       exportRoot = new lib.index();
@@ -105,6 +112,7 @@
         createjs.Ticker.addEventListener("tick", stage);
       }
 
+      // Escalado proporcional responsivo (preserva proporción 1280x720)
       AdobeAn.makeResponsive(true, 'both', false, 1, [canvas, anim_container, dom_overlay_container]);
 
       AdobeAn.compositionLoaded(lib.properties.id);
@@ -117,6 +125,10 @@
   <div id="animation_container">
     <canvas id="canvas" width="1280" height="720"></canvas>
     <div id="dom_overlay_container"></div>
+  </div>
+  <div id="_preload_div_">
+    <span style="display: inline-block; height: 100%; vertical-align: middle;"></span>
+    <img src="images/_preloader.gif" />
   </div>
 </body>
 </html>
